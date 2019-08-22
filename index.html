@@ -1,73 +1,191 @@
-<canvas id="gameCanvas" width="400" height="400"></canvas>
+<!DOCTYPE html>
+<html>
 
-<script type="text/javascript">
-	window.onload = function(){
-		 canv = document.getElementById("gameCanvas");
-		 context = canv.getContext("2d");
-		document.addEventListener("keydown", keyPush);
-		setInterval(game,1000/10)
-	}
-	const gs = 20 // grid size
-	const tc = 20 // tile count and grid size need to match the canavs size 
-	var px=py=10  // player position within the tiles	
-	var ax=ay=15 //apple initial position
-	var xVector=yVector=0;
-	trail = [];
-	tail = 5;
-	function game(){
-		px+=xVector;
-		py+=yVector;
+<head>
+	<title>Simple Snake</title>
+	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+		integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
 
-		if(px < 0){
-			px = tc-1;
-		}
-		if(px > tc-1){
-			px = 0;
-		}
-		if(py < 0){
-			py = tc-1;
-		}
-		if(py > tc-1){
-			py = 0;
-		}
-		context.fillStyle = "black";
-		context.fillRect(0,0,canv.width,canv.height);
+   <link rel="stylesheet" href="screenSize.css">
+	<!-- CSS styling -->
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.css" />
 
-		context.fillStyle = "lime";
-		for(var i=0; i<trail.length; i++){
-			context.fillRect(trail[i].x*gs,trail[i].y*gs,gs-2,gs-2);
-			if(trail[i].x === px && trail[i].y === py){
-				tail = 5;
+</head>
+
+<body style="background-image: url(./background.jpg)">
+	<div class="container">
+		<h3 class="ui block header">
+			Simple Snake game
+		</h3>
+		<div class="row centered" style="margin-top: 15px">
+			<div class="col-lg-2 ">
+			</div>
+			<div class="col-lg-8 col-sm-12">
+				<canvas class="ui segment" id="gameCanvas" width="600" height="600"></canvas>
+			</div>
+		</div>
+		<div class="row" style="margin-bottom: 180px">
+			<div class="col-lg-2 ">
+			</div>
+			<div class="col-lg-2 col-md-4">
+				<div class="ui segment">
+					<h3 id="score">score: 0</h3>
+				</div>
+			</div>
+		</div>
+		<div class="d-lg-none">
+			<div class="row justify-content-md-center" style="margin-bottom: 50px">
+				<div class="col-sm-1 "></div>
+				<div class="col-sm-2">
+					<button id="up" onclick="buttonClick('up')" class="massive ui icon button">
+						<i class="chevron up icon"></i>
+					</button>
+				</div>
+				<div class="col-sm-1 "></div>
+			</div>
+			<div class="row justify-content-md-center">
+				<div class="col-sm-2 ">
+					<button id="left" onclick="buttonClick('left')" class="massive ui icon button">
+						<i class="chevron left icon"></i>
+					</button>
+				</div>
+				<div class="col-sm-1 "></div>
+				<div class="col-sm-2">
+					<div class="row" style="margin-bottom: 100px"></div>
+					<button id="down" onclick="buttonClick('down')" class="massive ui icon button">
+						<i class="chevron down icon"></i>
+					</button>
+				</div>
+				<div class="col-sm-1 "></div>
+				<div class="col-sm-2">
+					<button id="right" onclick="buttonClick('right')" class="massive ui icon button">
+						<i class="chevron right icon"></i>
+					</button>
+				</div>
+			</div>
+		</div>
+
+	</div>
+
+	<script type="text/javascript">
+		window.onload = function () {
+			canv = document.querySelector("#gameCanvas");
+			score = 0;
+			context = canv.getContext("2d");
+			document.addEventListener("keydown", keyPush);
+			setInterval(game, 1000 / 10)
+		}
+		const gs = 20 // grid size
+		const tc = 30
+		var px = py = 15 // player position within the tiles	
+		var ax = ay = 20 //apple initial position
+		var xVector = yVector = 0;
+		var trail = [];
+		var tail = 5;
+
+		function game() {
+			px += xVector;
+			py += yVector;
+
+			if (px < 0) {
+				px = tc - 1;
+			}
+			if (px > tc - 1) {
+				px = 0;
+			}
+			if (py < 0) {
+				py = tc - 1;
+			}
+			if (py > tc - 1) {
+				py = 0;
+			}
+			context.fillStyle = "black";
+			context.fillRect(0, 0, canv.width, canv.height);
+
+			context.fillStyle = "lime";
+			for (var i = 0; i < trail.length; i++) {
+				context.fillRect(trail[i].x * gs, trail[i].y * gs, gs - 2, gs - 2);
+				//bite his tail
+				if (trail[i].x === px && trail[i].y === py) {
+					tail = 5;
+					score = 0;
+					document.getElementById("score").innerText = `score: ${score}`;
+				}
+			}
+			trail.push({
+				x: px,
+				y: py
+			});
+			while (trail.length > tail) {
+				trail.shift();
+			}
+
+			if (ax === px && ay === py) {
+				tail++;
+				while (ax === px && ay === py) {
+					ax = Math.floor(Math.random() * tc)
+					ay = Math.floor(Math.random() * tc)
+				}
+				score++;
+				document.getElementById("score").innerText = `score: ${score}`;
+			}
+			context.fillStyle = "red";
+			context.fillRect(ax * gs, ay * gs, gs - 2, gs - 2);
+		}
+
+		function keyPush(event) {
+			switch (event.keyCode) {
+				case 37: //left arrow
+					xVector = -1;
+					yVector = 0;
+					break;
+				case 38: //Up arrow
+					xVector = 0;
+					yVector = -1;
+					break;
+				case 39: //right arrow
+					xVector = 1;
+					yVector = 0;
+					break;
+				case 40: //down arrow
+					xVector = 0;
+					yVector = 1;
+					break;
 			}
 		}
-		trail.push({x:px,y:py});
-		while(trail.length>tail){
-			trail.shift();
-		}
 
-		if(ax === px && ay === py){
-			tail++;
-			ax=Math.floor(Math.random()*tc)
-			ay=Math.floor(Math.random()*tc)
+		function buttonClick(id) {
+			switch (id) {
+				case 'left':
+					xVector = -1;
+					yVector = 0;
+					break;
+				case 'up':
+					xVector = 0;
+					yVector = -1;
+					break;
+				case 'right':
+					xVector = 1;
+					yVector = 0;
+					break;
+				case 'down':
+					xVector = 0;
+					yVector = 1;
+					break;
+			}
 		}
-		context.fillStyle = "red";
-		context.fillRect(ax*gs,ay*gs,gs-2,gs-2);
-	}
+	</script>
 
-	function keyPush(event){
-		switch(event.keyCode){
-			case 37:
-			xVector=-1; yVector=0;
-			break;
-			case 38:
-			xVector=0; yVector=-1;
-			break;
-			case 39:
-			xVector=1; yVector=0;
-			break;
-			case 40:
-			xVector=0; yVector=1;
-			break;
-		}
-	}
-</script>
+	<!-- Bootstrap styling -->
+	<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+		integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous">
+	</script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
+		integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous">
+	</script>
+	<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+		integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous">
+	</script>
+</body>
+
+</html>
